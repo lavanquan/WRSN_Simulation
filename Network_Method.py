@@ -4,10 +4,14 @@ from Package import Package
 
 def uniform_com_func(net):
     for node in net.node:
-        r = random.random()
-        if r <= node.prob:
+        if node.id in net.target and random.random() <= node.prob and node.is_active:
             package = Package()
             node.send(net, package)
+            # if not package.is_success:
+            #     return False
+            # else:
+            #     return True
+    return True
 
 
 def to_string(net):
