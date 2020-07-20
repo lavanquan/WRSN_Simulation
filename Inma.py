@@ -4,12 +4,14 @@ import Parameter as para
 import math
 
 
-class Inma():
+class Inma:
     def __init__(self):
         self.x = 0
 
     def update(self, network=None):
         request_list = network.mc.list_request
+        if not len(request_list):
+            return network.mc.current, 0
         id_list = np.asarray([request["id"] for request in request_list])
         t = [(network.node[request["id"]].energy / request["avg_energy"]) for request in request_list]
         time_move = np.asarray([distance.euclidean(network.mc.current, network.node[request["id"]].location) / network.mc.velocity

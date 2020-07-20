@@ -1,7 +1,7 @@
+import math
 import numpy as np
 from pulp import *
 from scipy.spatial import distance
-import math
 
 import Parameter as para
 from Node_Method import find_receiver
@@ -33,7 +33,7 @@ def action_function(nb_action=81):
     list_action = []
     for i in range(int(math.sqrt(nb_action))):
         for j in range(int(math.sqrt(nb_action))):
-            list_action.append((100*(i+1), 100*(j+1)))
+            list_action.append((100 * (i + 1), 100 * (j + 1)))
     list_action.append(para.depot)
     return list_action
 
@@ -64,8 +64,8 @@ def get_weight(net, mc, q_learning, action_id, charging_time, receive_func=find_
             if request["id"] in path:
                 nb_path += 1
         w[request_id] = nb_path
-    total_weight = sum(w) + len(w) * 10**-3
-    w = np.asarray([(item + 10**-3) / total_weight for item in w])
+    total_weight = sum(w) + len(w) * 10 ** -3
+    w = np.asarray([(item + 10 ** -3) / total_weight for item in w])
     nb_target_alive = 0
     for path in all_path:
         if para.base in path and not (set(list_dead) & set(path)):
@@ -98,52 +98,91 @@ def get_charge_per_sec(net, q_learning, state):
          request in net.mc.list_request])
 
 
-def get_charging_time(network=None, q_learning=None, state=None, alpha=0, charge_per_sec=get_charge_per_sec):
-    if not len(network.mc.list_request):
-        return 0
+# def get_charging_time(network=None, q_learning=None, state=None, alpha=0, charge_per_sec=get_charge_per_sec):
+#     if not len(network.mc.list_request):
+#         return 0
+#
+#     model = LpProblem("Find optimal time", LpMaximize)
+#     T = LpVariable("Charging time", lowBound=0, upBound=None, cat=LpContinuous)
+#     a = LpVariable.matrix("a", list(range(len(network.mc.list_request))), lowBound=0, upBound=1, cat="integer")
+#     p = charge_per_sec(network, q_learning, state)
+#     count = 0
+#
+#     for index, request in enumerate(network.mc.list_request):
+#         if p[index] - request["avg_energy"] > 0:
+#             print("charging time =", p[index] - request["avg_energy"])
+#             count += 1
+#             model += network.node[request["id"]].energy - distance.euclidean(q_learning.action_list[q_learning.state],
+#                                                                              q_learning.action_list[
+#                                                                                  state]) / network.mc.velocity * \
+#                      request[
+#                          "avg_energy"] + (
+#                              p[index] - request["avg_energy"]) * T >= network.node[
+#                          request["id"]].energy_thresh + alpha * network.node[request["id"]].energy_max - 10 ** 5 * (
+#                              1 - a[index])
+#             model += network.node[request["id"]].energy - distance.euclidean(q_learning.action_list[q_learning.state],
+#                                                                              q_learning.action_list[
+#                                                                                  state]) / network.mc.velocity * \
+#                      request[
+#                          "avg_energy"] + (
+#                              p[index] - request["avg_energy"]) * T <= network.node[
+#                          request["id"]].energy_thresh + alpha * network.node[request["id"]].energy_max + 10 ** 5 * a[
+#                          index]
+#             model += network.node[request["id"]].energy - distance.euclidean(q_learning.action_list[q_learning.state],
+#                                                                              q_learning.action_list[
+#                                                                                  state]) / network.mc.velocity * \
+#                      request[
+#                          "avg_energy"] + (
+#                              p[index] - request["avg_energy"]) * T <= network.node[request["id"]].energy_max
+#     print("count =", count)
+#     if not count:
+#         model += T == min(
+#             [(- network.node[request["id"]].energy + distance.euclidean(q_learning.action_list[q_learning.state],
+#                                                                         q_learning.action_list[
+#                                                                             state]) / network.mc.velocity * request[
+#                   "avg_energy"] + network.node[request["id"]].energy_max) / (- p[index] + request["avg_energy"])
+#              for index, request in enumerate(network.mc.list_request)])
+#     print(model.constraints)
+#     model += lpSum(a)
+#     status = model.solve()
+#     print("status =", q_learning.action_list[state], value(T))
+#     return value(T)
 
-    model = LpProblem("Find optimal time", LpMaximize)
-    T = LpVariable("Charging time", lowBound=0, upBound=None, cat=LpContinuous)
-    a = LpVariable.matrix("a", list(range(len(network.mc.list_request))), lowBound=0, upBound=1, cat="integer")
-    p = charge_per_sec(network, q_learning, state)
-    count = 0
 
-    for index, request in enumerate(network.mc.list_request):
-        if p[index] - request["avg_energy"] > 0:
-            print("charging time =", p[index] - request["avg_energy"])
-            count += 1
-            model += network.node[request["id"]].energy - distance.euclidean(q_learning.action_list[q_learning.state],
-                                                                             q_learning.action_list[
-                                                                                 state]) / network.mc.velocity * \
-                     request[
-                         "avg_energy"] + (
-                             p[index] - request["avg_energy"]) * T >= network.node[
-                         request["id"]].energy_thresh + alpha * network.node[request["id"]].energy_max - 10 ** 5 * (
-                             1 - a[index])
-            model += network.node[request["id"]].energy - distance.euclidean(q_learning.action_list[q_learning.state],
-                                                                             q_learning.action_list[
-                                                                                 state]) / network.mc.velocity * \
-                     request[
-                         "avg_energy"] + (
-                             p[index] - request["avg_energy"]) * T <= network.node[
-                         request["id"]].energy_thresh + alpha * network.node[request["id"]].energy_max + 10 ** 5 * a[
-                         index]
-            model += network.node[request["id"]].energy - distance.euclidean(q_learning.action_list[q_learning.state],
-                                                                             q_learning.action_list[
-                                                                                 state]) / network.mc.velocity * \
-                     request[
-                         "avg_energy"] + (
-                             p[index] - request["avg_energy"]) * T <= network.node[request["id"]].energy_max
-    print("count =", count)
-    if not count:
-        model += T == min(
-            [(- network.node[request["id"]].energy + distance.euclidean(q_learning.action_list[q_learning.state],
-                                                                        q_learning.action_list[
-                                                                            state]) / network.mc.velocity * request[
-                  "avg_energy"] + network.node[request["id"]].energy_max) / (- p[index] + request["avg_energy"])
-             for index, request in enumerate(network.mc.list_request)])
-    print(model.constraints)
-    model += lpSum(a)
-    status = model.solve()
-    print("status =", status, value(T))
-    return value(T)
+def get_charging_time(network=None, q_learning=None, state=None, alpha=0):
+    # request_id = [request["id"] for request in network.mc.list_request]
+    time_move = distance.euclidean(network.mc.current, q_learning.action_list[state]) / network.mc.velocity
+    energy_min = network.node[0].energy_thresh + alpha * network.node[0].energy_max
+    s1 = []  # list of node in request list which has positive charge
+    s2 = []  # list of node not in request list which has negative charge
+    for node in network.node:
+        d = distance.euclidean(q_learning.action_list[state], node.location)
+        p = para.alpha / (d + para.beta) ** 2
+        if node.energy - time_move * node.avg_energy < energy_min and p - node.avg_energy > 0:
+            s1.append((node.id, p))
+        if node.energy - time_move * node.avg_energy > energy_min and p - node.avg_energy < 0:
+            s2.append((node.id, p))
+    t = []
+
+    for index, p in s1:
+        t.append((energy_min - network.node[index].energy + time_move * network.node[index].avg_energy) / (
+                p - network.node[index].avg_energy))
+    for index, p in s2:
+        t.append((energy_min - network.node[index].energy + time_move * network.node[index].avg_energy) / (
+                p - network.node[index].avg_energy))
+    dead_list = []
+    for item in t:
+        nb_dead = 0
+        for index, p in s1:
+            temp = network.node[index].energy - time_move * network.node[index].avg_energy + (
+                        p - network.node[index].avg_energy) * item
+            if temp < energy_min:
+                nb_dead += 1
+        for index, p in s2:
+            temp = network.node[index].energy - time_move * network.node[index].avg_energy + (
+                        p - network.node[index].avg_energy) * item
+            if temp < energy_min:
+                nb_dead += 1
+        dead_list.append(nb_dead)
+    arg_min = np.argmin(dead_list)
+    return t[arg_min]

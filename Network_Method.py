@@ -7,10 +7,6 @@ def uniform_com_func(net):
         if node.id in net.target and random.random() <= node.prob and node.is_active:
             package = Package()
             node.send(net, package)
-            # if not package.is_success:
-            #     return False
-            # else:
-            #     return True
     return True
 
 

@@ -21,7 +21,7 @@ class Q_learning:
         self.q_table[self.state] = (1 - alpha) * self.q_table[self.state] + alpha * (
                 self.reward + gamma * self.q_max(q_max_func))
         self.choose_next_state(network)
-        if self.state == len(self.action_list):
+        if self.state == len(self.action_list) - 1:
             charging_time = (network.mc.capacity - network.mc.energy) / network.mc.e_self_charge
         else:
             charging_time = self.charging_time[self.state]
@@ -49,10 +49,9 @@ class Q_learning:
         self.reward_max = list(zip(first, second, third))
 
     def choose_next_state(self, network):
-        next_state = np.argmax(self.q_table[self.state])
-        if network.mc.energy < distance.euclidean(network.mc.current, self.action_list[
-            next_state]) / network.mc.velocity * network.mc.e_move:
-            self.state = len(self.q_table)
+        # next_state = np.argmax(self.q_table[self.state])
+        if network.mc.energy < 10:
+            self.state = len(self.q_table) - 1
         else:
             self.state = np.argmax(self.q_table[self.state])
             print(self.reward_max[self.state])

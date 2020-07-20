@@ -7,7 +7,7 @@ from MobileCharger import MobileCharger
 from Q__Learning import Q_learning
 from Inma import Inma
 
-index = 0
+index = 1
 df = pd.read_csv("data/thaydoisonode.csv")
 node_pos = list(literal_eval(df.node_pos[index]))
 list_node = []
@@ -25,4 +25,4 @@ target = [int(item) for item in df.target[index].split(',')]
 net = Network(list_node=list_node, mc=mc, target=target)
 q_learning = Q_learning(network=net)
 # inma = Inma()
-net.simulate(q_learning=q_learning)
+# net.simulate(q_learning=q_learning)

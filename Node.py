@@ -23,6 +23,7 @@ class Node:
         self.neighbor = []  # neighborhood of sensor
         self.is_active = is_active  # statement of sensor. If sensor dead, state is False
         self.is_request = False
+        self.level = 0
 
     def set_average_energy(self, func=estimate_average_energy):
         """
@@ -86,6 +87,7 @@ class Node:
             e_send = para.ET + para.EFS * d ** 2 if d <= d0 else para.ET + para.EMP * d ** 4
             self.energy -= e_send * package.size
             self.used_energy += e_send * package.size
+            package.update_path(-1)
         self.check_active(net)
 
     def receive(self, package):
