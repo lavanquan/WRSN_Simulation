@@ -9,7 +9,7 @@ class Package:
         self.is_success = False
 
     def get_size(self):
-        return para.b if self.is_energy_info else para.b_energy
+        return para.b if not self.is_energy_info else para.b_energy
 
     def update_path(self, node_id):
         self.path.append(node_id)

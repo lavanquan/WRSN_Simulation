@@ -1,6 +1,7 @@
-from MobileCharger_Method import get_location, charging
 from scipy.spatial import distance
+
 import Parameter as para
+from MobileCharger_Method import get_location, charging
 
 
 class MobileCharger:
@@ -31,7 +32,7 @@ class MobileCharger:
         func(self, net, node)
 
     def self_charge(self):
-        self.energy += self.e_self_charge
+        self.energy = min(self.energy + self.e_self_charge, self.capacity)
 
     def check_state(self):
         if distance.euclidean(self.current, self.end) < 1:
@@ -72,4 +73,11 @@ class MobileCharger:
                 else:
                     print("self charging")
                     self.self_charge()
+        if self.energy < para.E_mc_thresh and not self.is_self_charge and self.end != para.depot:
+            self.start = self.current
+            self.end = para.depot
+            self.is_stand = False
+            charging_time = self.capacity / self.e_self_charge
+            moving_time = distance.euclidean(self.start, self.end) / self.velocity
+            self.end_time = time_stem + moving_time + charging_time
         self.check_state()

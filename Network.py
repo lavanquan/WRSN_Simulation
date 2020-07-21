@@ -1,6 +1,9 @@
+import csv
+
 from scipy.spatial import distance
-from Network_Method import uniform_com_func, to_string
+
 import Parameter as para
+from Network_Method import uniform_com_func, to_string, count_function
 
 
 class Network:
@@ -51,23 +54,51 @@ class Network:
         self.mc.run(network=self, time_stem=t, net=self, q_learning=q_learning)
         return state
 
-    def simulate(self, q_learning):
+    def simulate(self, q_learning, file_name="log/energy_log.csv"):
+        energy_log = open(file_name, "w")
+        writer = csv.DictWriter(energy_log, fieldnames=["time", "mc energy", "min energy"])
+        writer.writeheader()
         t = 0
-        while self.find_min_node()[1] >= 0:
+        while self.node[self.find_min_node()].energy >= 0:
             t = t + 1
-            print(t, self.mc.current, self.find_min_node())
+            print(t, self.mc.current, self.node[self.find_min_node()].energy)
             state = self.run_per_second(t, q_learning)
-            if not state:
-                break
+            if not (t - 1) % 100:
+                writer.writerow(
+                    {"time": t, "mc energy": self.mc.energy, "min energy": self.node[self.find_min_node()].energy})
+            # if not state:
+            #     break
+        writer.writerow({"time": t, "mc energy": self.mc.energy, "min energy": self.node[self.find_min_node()].energy})
+        energy_log.close()
+
+    # def simulate(self, q_learning):
+    #     t = 0
+    #     while t < 20000:
+    #         t += 1
+    #         print(t, self.mc.current, self.find_min_node(), self.count_dead_node(), self.count_package())
+    #         state = self.run_per_second(t, q_learning)
+    #         if not state:
+    #             break
 
     def print_net(self, func=to_string):
         func(self)
 
     def find_min_node(self):
-        min_energy = 10**10
+        min_energy = 10 ** 10
         min_id = -1
         for node in self.node:
             if node.energy < min_energy:
                 min_energy = node.energy
                 min_id = node.id
-        return min_id, min_energy, self.node[min_id].location
+        return min_id
+
+    def count_dead_node(self):
+        count = 0
+        for node in self.node:
+            if node.energy < 0:
+                count += 1
+        return count
+
+    def count_package(self, count_func=count_function):
+        count = count_func(self)
+        return count
