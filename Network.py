@@ -3,7 +3,7 @@ import csv
 from scipy.spatial import distance
 
 import Parameter as para
-from Network_Method import uniform_com_func, to_string, count_function
+from Network_Method import uniform_com_func, to_string, count_package_function
 
 
 class Network:
@@ -49,12 +49,10 @@ class Network:
             for index, node in enumerate(self.node):
                 if index not in request_id and (t - node.check_point[-1]["time"]) > 50:
                     node.set_check_point(t)
-            # for node in self.node:
-            #     print("avg_energy =", node.id, node.avg_energy,)
         self.mc.run(network=self, time_stem=t, net=self, q_learning=q_learning)
         return state
 
-    def simulate(self, q_learning, file_name="log/energy_log.csv"):
+    def simulate_lifetime(self, q_learning, file_name="log/energy_log.csv"):
         energy_log = open(file_name, "w")
         writer = csv.DictWriter(energy_log, fieldnames=["time", "mc energy", "min energy"])
         writer.writeheader()
@@ -63,22 +61,36 @@ class Network:
             t = t + 1
             print(t, self.mc.current, self.node[self.find_min_node()].energy)
             state = self.run_per_second(t, q_learning)
-            if not (t - 1) % 100:
+            if not (t - 1) % 50:
                 writer.writerow(
                     {"time": t, "mc energy": self.mc.energy, "min energy": self.node[self.find_min_node()].energy})
-            # if not state:
-            #     break
         writer.writerow({"time": t, "mc energy": self.mc.energy, "min energy": self.node[self.find_min_node()].energy})
         energy_log.close()
 
-    # def simulate(self, q_learning):
-    #     t = 0
-    #     while t < 20000:
-    #         t += 1
-    #         print(t, self.mc.current, self.find_min_node(), self.count_dead_node(), self.count_package())
-    #         state = self.run_per_second(t, q_learning)
-    #         if not state:
-    #             break
+    def simulate_max_time(self, q_learning, max_time=10000, file_name="log/information_log.csv"):
+        information_log = open(file_name, "w")
+        writer = csv.DictWriter(information_log, fieldnames=["time", "nb dead", "nb package"])
+        writer.writeheader()
+        nb_dead = 0
+        nb_package = len(self.target)
+        t = 0
+        while t <= max_time:
+            t += 1
+            print(t, self.mc.current, self.node[self.find_min_node()].energy)
+            state = self.run_per_second(t, q_learning)
+            current_dead = self.count_dead_node()
+            current_package = self.count_package()
+            if current_dead != nb_dead or current_package != nb_package:
+                nb_dead = current_dead
+                nb_package = current_package
+                writer.writerow({"time": t, "nb dead": nb_dead, "nb package": nb_package})
+        information_log.close()
+
+    def simulate(self, q_learning, max_time=None, file_name="log/energy_log.csv"):
+        if max_time:
+            self.simulate_max_time(q_learning=q_learning, max_time=max_time, file_name=file_name)
+        else:
+            self.simulate_lifetime(q_learning=q_learning, file_name=file_name)
 
     def print_net(self, func=to_string):
         func(self)
@@ -99,6 +111,6 @@ class Network:
                 count += 1
         return count
 
-    def count_package(self, count_func=count_function):
+    def count_package(self, count_func=count_package_function):
         count = count_func(self)
         return count

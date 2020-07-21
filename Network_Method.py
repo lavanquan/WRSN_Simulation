@@ -21,7 +21,7 @@ def to_string(net):
     min_node.print_node()
 
 
-def count_function(net):
+def count_package_function(net):
     count = 0
     for target_id in net.target:
         package = Package(is_energy_info=True)

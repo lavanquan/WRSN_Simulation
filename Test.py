@@ -16,7 +16,7 @@ for i in range(len(node_pos)):
     com_ran = df.commRange[index]
     energy = df.energy[index]
     energy_max = df.energy[index]
-    prob = df.fred[index]
+    prob = df.freq[index]
     node = Node(location=location, com_ran=com_ran, energy=energy, energy_max=energy_max, id=i,
                 energy_thresh=0.4 * energy, prob=prob)
     list_node.append(node)
@@ -24,6 +24,7 @@ mc = MobileCharger(energy=df.E_mc[index], capacity=df.E_max[index], e_move=df.e_
                    e_self_charge=df.e_mc[index], velocity=df.velocity[index])
 target = [int(item) for item in df.target[index].split(',')]
 net = Network(list_node=list_node,  mc=mc, target=target)
+print(len(net.node), len(net.target), max(net.target))
 q_learning = Q_learning(network=net)
 inma = Inma()
-net.simulate(q_learning=q_learning)
+net.simulate(q_learning=q_learning, max_time=20000, file_name="log/q_learning_information_log.csv")

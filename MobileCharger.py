@@ -53,7 +53,7 @@ class MobileCharger:
         self.end_time = time_stem + moving_time + charging_time
 
     def run(self, network, time_stem, net=None, q_learning=None):
-        print(self.energy, self.start, self.end, self.current)
+        # print(self.energy, self.start, self.end, self.current)
         if (not self.is_active and self.list_request) or abs(
                 time_stem - self.end_time) < 1:
             self.is_active = True
