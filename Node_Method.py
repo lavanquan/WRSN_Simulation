@@ -41,7 +41,8 @@ def find_receiver(node, net):
     """
     if not node.is_active:
         return -1
-    candidate = [neighbor_id for neighbor_id in node.neighbor if net.node[neighbor_id].level < node.level]
+    candidate = [neighbor_id for neighbor_id in node.neighbor if
+                 net.node[neighbor_id].level < node.level and net.node[neighbor_id].is_active]
     if candidate:
         d = [distance.euclidean(net.node[candidate_id].location, para.base) for candidate_id in candidate]
         id_min = np.argmin(d)

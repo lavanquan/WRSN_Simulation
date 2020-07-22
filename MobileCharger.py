@@ -45,14 +45,14 @@ class MobileCharger:
         else:
             self.is_self_charge = False
 
-    def get_next_location(self, network, time_stem, q_learning=None):
-        next_location, charging_time = q_learning.update(network)
+    def get_next_location(self, network, time_stem, optimizer=None):
+        next_location, charging_time = optimizer.update(network)
         self.start = self.current
         self.end = next_location
         moving_time = distance.euclidean(self.start, self.end) / self.velocity
         self.end_time = time_stem + moving_time + charging_time
 
-    def run(self, network, time_stem, net=None, q_learning=None):
+    def run(self, network, time_stem, net=None, optimizer=None):
         # print(self.energy, self.start, self.end, self.current)
         if (not self.is_active and self.list_request) or abs(
                 time_stem - self.end_time) < 1:
@@ -61,7 +61,7 @@ class MobileCharger:
                                  net.node[request["id"]].energy < net.node[request["id"]].energy_thresh]
             if not self.list_request:
                 self.is_active = False
-            self.get_next_location(network=network, time_stem=time_stem, q_learning=q_learning)
+            self.get_next_location(network=network, time_stem=time_stem, optimizer=optimizer)
         else:
             if self.is_active:
                 if not self.is_stand:
