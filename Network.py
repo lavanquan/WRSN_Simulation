@@ -60,13 +60,16 @@ class Network:
         t = 0
         while self.node[self.find_min_node()].energy >= 0:
             t = t + 1
-            print(t, self.mc.current, self.node[self.find_min_node()].energy)
+            if (t-1) % 100 == 0:
+                print(t, self.mc.current, self.node[self.find_min_node()].energy)
             state = self.run_per_second(t, optimizer)
             if not (t - 1) % 50:
                 writer.writerow(
                     {"time": t, "mc energy": self.mc.energy, "min energy": self.node[self.find_min_node()].energy})
+        print(t, self.mc.current, self.node[self.find_min_node()].energy)
         writer.writerow({"time": t, "mc energy": self.mc.energy, "min energy": self.node[self.find_min_node()].energy})
         energy_log.close()
+        return t
 
     def simulate_max_time(self, optimizer, max_time=10000, file_name="log/information_log.csv"):
         information_log = open(file_name, "w")
@@ -77,7 +80,8 @@ class Network:
         t = 0
         while t <= max_time:
             t += 1
-            print(t, self.mc.current, self.node[self.find_min_node()].energy)
+            if (t-1)%100 == 0:
+                print(t, self.mc.current, self.node[self.find_min_node()].energy)
             state = self.run_per_second(t, optimizer)
             current_dead = self.count_dead_node()
             current_package = self.count_package()
@@ -85,13 +89,16 @@ class Network:
                 nb_dead = current_dead
                 nb_package = current_package
                 writer.writerow({"time": t, "nb dead": nb_dead, "nb package": nb_package})
+        print(t, self.mc.current, self.node[self.find_min_node()].energy)
         information_log.close()
+        return t
 
     def simulate(self, optimizer, max_time=None, file_name="log/energy_log.csv"):
         if max_time:
-            self.simulate_max_time(optimizer=optimizer, max_time=max_time, file_name=file_name)
+            life_time = self.simulate_max_time(optimizer=optimizer, max_time=max_time, file_name=file_name)
         else:
-            self.simulate_lifetime(optimizer=optimizer, file_name=file_name)
+            life_time = self.simulate_lifetime(optimizer=optimizer, file_name=file_name)
+        return life_time
 
     def print_net(self, func=to_string):
         func(self)

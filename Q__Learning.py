@@ -26,7 +26,7 @@ class Q_learning:
         else:
             charging_time = self.charging_time[self.state]
         print("next state =", self.action_list[self.state], self.state, charging_time)
-        print(self.charging_time)
+        # print(self.charging_time)
         return self.action_list[self.state], charging_time
 
     def q_max(self, q_max_func=q_max_function):
@@ -54,5 +54,5 @@ class Q_learning:
             self.state = len(self.q_table) - 1
         else:
             self.state = np.argmax(self.q_table[self.state])
-            print(self.reward_max[self.state])
-            print(self.action_list[self.state])
+            # print(self.reward_max[self.state])
+            # print(self.action_list[self.state])
